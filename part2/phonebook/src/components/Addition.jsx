@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import numbers from '../services/persons'
 
-const Addition = ({ persons, setPersons }) => {
+const Addition = ({ persons, setPersons, setMessage }) => {
     const [newName, setNewName] = useState('')
     const [newPhone, setNewPhone] = useState('')
     
@@ -26,6 +26,7 @@ const Addition = ({ persons, setPersons }) => {
                     setPersons(persons.concat(returnedPerson))
                     setNewName('')
                     setNewPhone('')
+                    setMessage(`${returnedPerson.name} succesfully added`)
                 })
         : 
             confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
@@ -37,6 +38,7 @@ const Addition = ({ persons, setPersons }) => {
                     setPersons(newPersons)
                     setNewName('')
                     setNewPhone('')
+                    setMessage(`${returnedPerson.name} succesfully modified with number: ${returnedPerson.number}`)
                 })
                 .catch(error => alert(error))
             :
