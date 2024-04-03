@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
+import numbers from '../services/persons'
 
-const Addition = ({ persons, setPersons }) => {
+const Addition = ({ persons, setPersons, setMessage }) => {
     const [newName, setNewName] = useState('')
     const [newPhone, setNewPhone] = useState('')
     
@@ -10,21 +11,38 @@ const Addition = ({ persons, setPersons }) => {
     }
     
     const handleAdd = (e) => {
-        e.preventDefault()    
+        e.preventDefault()
         const newPerson = {
           name: newName,
-          number: newPhone,
-          id: persons.length + 1
+          number: newPhone
         }
         
-        persons.find((el) => el.name === newName) === undefined 
+        const encountered = persons.find((el) => el.name === newName)
+        encountered === undefined 
         ?
-            setPersons(persons.concat(newPerson)) 
+            numbers
+                .create(newPerson)
+                .then((returnedPerson) => {
+                    setPersons(persons.concat(returnedPerson))
+                    setNewName('')
+                    setNewPhone('')
+                    setMessage(`${returnedPerson.name} succesfully added`)
+                })
         : 
-            alert(`${newName} is already added to phonebook`)
-
-        setNewName('')
-        setNewPhone('')
+            confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
+            ?
+                numbers
+                .update(encountered.id, newPerson)
+                .then((returnedPerson) => {
+                    const newPersons = persons.map((person) => person.id === returnedPerson.id ? { ...person, number: returnedPerson.number } : person)
+                    setPersons(newPersons)
+                    setNewName('')
+                    setNewPhone('')
+                    setMessage(`${returnedPerson.name} succesfully modified with number: ${returnedPerson.number}`)
+                })
+                .catch(error => alert(error))
+            :
+                null
     }
 
     return (
@@ -33,9 +51,7 @@ const Addition = ({ persons, setPersons }) => {
             <form onSubmit={handleAdd}>
                 <div>name: <input type='text' onChange={handleChange} value={newName} /></div>
                 <div>number: <input type='tel' onChange={handleChange}  value={newPhone} /></div>
-                <div>
                 <button type="submit">add</button>
-                </div>
             </form>
         </>
     )
